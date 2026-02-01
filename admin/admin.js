@@ -101,7 +101,6 @@ async function cargarIglesias() {
                 ]);
                 totalReportes = reportesSnap.size;
                 totalAccesos = accessSnap.size;
-                totalAccesos = accessSnap.size;
             } catch (e) {
                 console.error('Error loading stats for', id, e);
             }
@@ -191,32 +190,35 @@ async function cargarEstadisticas() {
     
     try {
         const iglesiasSnap = await getDocs(collection(db, "config_church"));
-        const estadisticas = [];
         
-        for (const iglesia of iglesiasSnap.docs) {
+        // Cargar estadísticas de todas las iglesias en paralelo
+        const estadisticasPromises = iglesiasSnap.docs.map(async (iglesia) => {
             const idIglesia = iglesia.id;
             const data = iglesia.data();
             
-            // Contar reportes
-            const reportesSnap = await getDocs(collection(db, `church_data/${idIglesia}/reportes`));
-            const totalReportes = reportesSnap.size;
+            // Cargar reportes y accesos en paralelo
+            const [reportesSnap, accessLogsSnap] = await Promise.all([
+                getDocs(collection(db, `church_data/${idIglesia}/reportes`)),
+                getDocs(collection(db, `church_data/${idIglesia}/access_logs`))
+            ]);
             
-            // Obtener últimos accesos
-            const accessLogsSnap = await getDocs(collection(db, `church_data/${idIglesia}/access_logs`));
+            const totalReportes = reportesSnap.size;
             const totalAccesos = accessLogsSnap.size;
             const ultimoAcceso = accessLogsSnap.docs
                 .map(d => d.data().timestamp)
                 .filter(t => t)
                 .sort((a, b) => new Date(b) - new Date(a))[0];
             
-            estadisticas.push({
+            return {
                 id: idIglesia,
                 nombre: data.nombre,
                 totalReportes,
                 totalAccesos,
                 ultimoAcceso: ultimoAcceso ? new Date(ultimoAcceso) : null
-            });
-        }
+            };
+        });
+        
+        const estadisticas = await Promise.all(estadisticasPromises);
         
         // Ordenar por total de reportes
         estadisticas.sort((a, b) => b.totalReportes - a.totalReportes);
