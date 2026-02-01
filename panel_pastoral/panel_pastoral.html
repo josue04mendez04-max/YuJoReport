@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Panel Pastoral</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#19e65e",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#112116",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <script type="module" src="panel_pastoral.js"></script>
+    <style>
+        /* Fallback styles + Custom */
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .nav-btn.active { color: #19e65e; }
+        .nav-btn.active .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400; }
+        .section-page { display: none; }
+        .section-page.active { display: block; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes popGrow { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .animate-pop { animation: popGrow 240ms ease-out; }
+        .filter-chip.active { background: rgba(25,230,94,0.2); border-color: rgba(25,230,94,0.3); }
+        .cumple-tab.active { background: #19e65e; color: #112116; }
+        /* Mobile touch improvements */
+        button, .pop-card { -webkit-tap-highlight-color: transparent; }
+        input, select, textarea { font-size: 16px !important; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111813] dark:text-white min-h-screen">
+
+<!-- Mobile Container -->
+<div class="max-w-[480px] mx-auto min-h-screen bg-white dark:bg-[#1a2a1f] shadow-2xl relative overflow-hidden flex flex-col">
+    
+    <!-- Top Header -->
+    <header class="sticky top-0 z-20 bg-white/90 dark:bg-[#1a2a1f]/90 backdrop-blur-md border-b border-[#f0f4f2] dark:border-white/10 px-4 py-3">
+        <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <div class="bg-primary p-1.5 rounded-lg text-white">
+                    <span class="material-symbols-outlined text-xl leading-none">church</span>
+                </div>
+                <h1 id="headerTitle" class="text-lg font-bold tracking-tight">Panel Pastoral</h1>
+            </div>
+            <div class="flex gap-2">
+                <button id="btnNotifications" class="size-10 flex items-center justify-center rounded-xl bg-[#f0f4f2] dark:bg-white/5 text-[#111813] dark:text-white relative">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area with Sections -->
+    <main class="flex-1 overflow-y-auto pb-24">
+        
+        <!-- ============ SECTION: INICIO ============ -->
+        <section id="seccionInicio" class="section-page active p-4">
+            <div class="text-center mb-6">
+                <h2 class="text-xl font-bold text-[#111813] dark:text-white">Bienvenido</h2>
+                <p class="text-sm text-[#63886f] mt-1">Resumen de ministerios</p>
+            </div>
+            
+            <!-- Ministerios Grid -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bubble-glass cursor-pointer" data-ministerio="Damas">
+                    <div class="bg-gradient-to-br from-pink-100 to-pink-200/60 dark:from-pink-900/30 dark:to-pink-800/20 border-2 border-pink-300/50 rounded-2xl p-4 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+                        <span class="material-symbols-outlined text-4xl text-pink-500">female</span>
+                        <span class="font-bold text-pink-700 dark:text-pink-200 mt-2">Damas</span>
+                        <span class="ministerio-count text-2xl font-bold text-pink-600 dark:text-pink-300 mt-1">0</span>
+                    </div>
+                </div>
+                <div class="bubble-glass cursor-pointer" data-ministerio="Caballeros">
+                    <div class="bg-gradient-to-br from-blue-100 to-blue-200/60 dark:from-blue-900/30 dark:to-blue-800/20 border-2 border-blue-300/50 rounded-2xl p-4 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+                        <span class="material-symbols-outlined text-4xl text-blue-600">male</span>
+                        <span class="font-bold text-blue-700 dark:text-blue-200 mt-2">Caballeros</span>
+                        <span class="ministerio-count text-2xl font-bold text-blue-600 dark:text-blue-300 mt-1">0</span>
+                    </div>
+                </div>
+                <div class="bubble-glass cursor-pointer" data-ministerio="Niños">
+                    <div class="bg-gradient-to-br from-yellow-100 to-yellow-200/60 dark:from-yellow-900/30 dark:to-yellow-800/20 border-2 border-yellow-300/50 rounded-2xl p-4 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+                        <span class="material-symbols-outlined text-4xl text-yellow-600">child_care</span>
+                        <span class="font-bold text-yellow-700 dark:text-yellow-200 mt-2">Niños</span>
+                        <span class="ministerio-count text-2xl font-bold text-yellow-600 dark:text-yellow-300 mt-1">0</span>
+                    </div>
+                </div>
+                <div class="bubble-glass cursor-pointer" data-ministerio="Jovenes">
+                    <div class="bg-gradient-to-br from-green-100 to-green-200/60 dark:from-green-900/30 dark:to-green-800/20 border-2 border-green-300/50 rounded-2xl p-4 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+                        <span class="material-symbols-outlined text-4xl text-green-600">diversity_3</span>
+                        <span class="font-bold text-green-700 dark:text-green-200 mt-2">Jóvenes</span>
+                        <span class="ministerio-count text-2xl font-bold text-green-600 dark:text-green-300 mt-1">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="mt-6 bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-4 border border-primary/20">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-bold text-sm text-[#111813] dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">insights</span>
+                        Resumen Semanal
+                    </h3>
+                    <div class="flex gap-1 bg-white/30 dark:bg-white/10 rounded-lg p-1">
+                        <button id="btnVerSemana" class="px-2 py-1 rounded text-[10px] font-bold bg-primary text-[#112116]">Semana</button>
+                        <button id="btnVerMes" class="px-2 py-1 rounded text-[10px] font-medium text-[#63886f]">Mes</button>
+                    </div>
+                </div>
+                <div id="quickStats" class="grid grid-cols-3 gap-2 text-center">
+                    <div class="bg-white/50 dark:bg-white/5 rounded-xl p-3">
+                        <div class="text-xl font-bold text-primary" id="statCapitulos">0</div>
+                        <div class="text-[10px] text-[#63886f]">Capítulos</div>
+                    </div>
+                    <div class="bg-white/50 dark:bg-white/5 rounded-xl p-3">
+                        <div class="text-xl font-bold text-primary" id="statAyunos">0</div>
+                        <div class="text-[10px] text-[#63886f]">Ayunos</div>
+                    </div>
+                    <div class="bg-white/50 dark:bg-white/5 rounded-xl p-3">
+                        <div class="text-xl font-bold text-primary" id="statAlmas">0</div>
+                        <div class="text-[10px] text-[#63886f]">Almas</div>
+                    </div>
+                    <div class="bg-white/50 dark:bg-white/5 rounded-xl p-3">
+                        <div class="text-xl font-bold text-primary" id="statHoras">0:00</div>
+                        <div class="text-[10px] text-[#63886f]">Oración</div>
+                    </div>
+                    <div class="bg-white/50 dark:bg-white/5 rounded-xl p-3">
+                        <div class="text-xl font-bold text-primary" id="statAltares">0</div>
+                        <div class="text-[10px] text-[#63886f]">Altares</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ SECTION: REPORTES ============ -->
+        <section id="seccionReportes" class="section-page p-4">
+            <!-- Search -->
+            <div class="relative mb-4">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#63886f] text-xl">search</span>
+                <input id="searchReporte" class="w-full bg-[#f0f4f2] dark:bg-white/5 border-none rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary/50 placeholder:text-[#63886f]" placeholder="Buscar por nombre..." type="text"/>
+            </div>
+
+            <!-- Filter Chips by Ministry -->
+            <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar mb-4">
+                <button class="filter-chip active flex h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-transparent px-4 text-xs font-semibold" data-filter="todos">
+                    Todos
+                </button>
+                <button class="filter-chip flex h-9 shrink-0 items-center justify-center gap-1 rounded-full bg-[#f0f4f2] dark:bg-white/5 border border-transparent px-4 text-xs font-medium" data-filter="Damas">
+                    Damas
+                </button>
+                <button class="filter-chip flex h-9 shrink-0 items-center justify-center gap-1 rounded-full bg-[#f0f4f2] dark:bg-white/5 border border-transparent px-4 text-xs font-medium" data-filter="Caballeros">
+                    Caballeros
+                </button>
+                <button class="filter-chip flex h-9 shrink-0 items-center justify-center gap-1 rounded-full bg-[#f0f4f2] dark:bg-white/5 border border-transparent px-4 text-xs font-medium" data-filter="Niños">
+                    Niños
+                </button>
+                <button class="filter-chip flex h-9 shrink-0 items-center justify-center gap-1 rounded-full bg-[#f0f4f2] dark:bg-white/5 border border-transparent px-4 text-xs font-medium" data-filter="Jovenes">
+                    Jóvenes
+                </button>
+            </div>
+
+            <!-- Week Selector -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-bold text-sm flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">date_range</span>
+                        Seleccionar Semana
+                    </h3>
+                    <button id="btnHistorial" class="text-xs text-primary font-medium flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-full">
+                        <span class="material-symbols-outlined text-sm">history</span>
+                        Ver historial
+                    </button>
+                </div>
+                <div id="weekSelector" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                    <!-- Weeks will be generated dynamically -->
+                </div>
+            </div>
+
+            <!-- Totals Summary for current week -->
+            <div id="totalesReportes" class="bg-primary/10 rounded-xl p-3 mb-4">
+                <div class="text-center text-sm font-medium text-[#111813] dark:text-white">Cargando totales...</div>
+            </div>
+
+            <!-- Reports List -->
+            <div id="reportesList" class="space-y-3">
+                <div class="text-center py-8 text-[#63886f]">
+                    <span class="material-symbols-outlined text-4xl mb-2">hourglass_empty</span>
+                    <p>Cargando reportes...</p>
+                </div>
+            </div>
+
+            <!-- Export Buttons (moved to bottom) -->
+            <div class="mt-6 bg-white dark:bg-[#1f3025] rounded-2xl p-4 shadow border border-[#f0f4f2] dark:border-white/10">
+                <h4 class="text-xs font-bold text-[#63886f] uppercase mb-3">Exportar Semana Seleccionada</h4>
+                <div class="flex gap-2">
+                    <button id="btnExportExcel" class="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-xl shadow transition-colors text-sm">
+                        <span class="material-symbols-outlined text-lg">table_view</span>
+                        Excel
+                    </button>
+                    <button id="btnExportPDF" class="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-3 rounded-xl shadow transition-colors text-sm">
+                        <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                        PDF
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ SECTION: MIEMBROS ============ -->
+        <section id="seccionMiembros" class="section-page p-4">
+            <!-- Birthdays Tabs -->
+            <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
+                <button class="cumple-tab active flex-1 min-w-[80px] py-2.5 px-3 rounded-xl font-bold text-sm" data-period="dia">
+                    Hoy
+                </button>
+                <button class="cumple-tab flex-1 min-w-[80px] py-2.5 px-3 rounded-xl bg-[#f0f4f2] dark:bg-white/5 font-medium text-sm" data-period="semana">
+                    Esta Semana
+                </button>
+                <button class="cumple-tab flex-1 min-w-[80px] py-2.5 px-3 rounded-xl bg-[#f0f4f2] dark:bg-white/5 font-medium text-sm" data-period="mes">
+                    Este Mes
+                </button>
+            </div>
+
+            <!-- Birthday List -->
+            <div class="mb-6">
+                <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">cake</span>
+                    Cumpleaños
+                </h3>
+                <div id="cumplesList" class="space-y-2">
+                    <div class="text-center py-4 text-[#63886f]">Cargando...</div>
+                </div>
+            </div>
+
+            <!-- Members Search -->
+            <div class="relative mb-4">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#63886f] text-xl">search</span>
+                <input id="searchMiembro" class="w-full bg-[#f0f4f2] dark:bg-white/5 border-none rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary/50 placeholder:text-[#63886f]" placeholder="Buscar miembro..." type="text"/>
+            </div>
+
+            <!-- Members List -->
+            <div>
+                <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">groups</span>
+                    Lista de Miembros
+                </h3>
+                <div id="miembrosList" class="space-y-2">
+                    <div class="text-center py-4 text-[#63886f]">Cargando...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ SECTION: AJUSTES ============ -->
+        <section id="seccionAjustes" class="section-page p-4">
+            <div class="text-center mb-6">
+                <div class="size-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-4xl text-primary">settings</span>
+                </div>
+                <h2 class="text-xl font-bold">Configuración</h2>
+            </div>
+
+            <!-- Password Settings -->
+            <div class="bg-white dark:bg-[#1f3025] rounded-2xl p-4 shadow border border-[#f0f4f2] dark:border-white/10 mb-4">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">lock</span>
+                    Contraseña del Panel
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs font-bold text-[#63886f] uppercase mb-1 block">Contraseña Actual</label>
+                        <input id="currentPassword" type="password" class="w-full bg-[#f0f4f2] dark:bg-white/5 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-primary/50" placeholder="••••••••"/>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-[#63886f] uppercase mb-1 block">Nueva Contraseña</label>
+                        <input id="newPassword" type="password" class="w-full bg-[#f0f4f2] dark:bg-white/5 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-primary/50" placeholder="••••••••"/>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-[#63886f] uppercase mb-1 block">Confirmar Nueva Contraseña</label>
+                        <input id="confirmPassword" type="password" class="w-full bg-[#f0f4f2] dark:bg-white/5 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-primary/50" placeholder="••••••••"/>
+                    </div>
+                    <button id="btnChangePassword" class="w-full bg-primary hover:bg-primary/90 text-[#112116] font-bold py-3 rounded-xl shadow-lg transition-colors">
+                        Cambiar Contraseña
+                    </button>
+                    <p id="passwordMsg" class="text-sm text-center hidden"></p>
+                </div>
+            </div>
+
+            <!-- Other Options -->
+            <div class="bg-white dark:bg-[#1f3025] rounded-2xl shadow border border-[#f0f4f2] dark:border-white/10 overflow-hidden">
+                <button id="btnLogout" class="w-full flex items-center gap-3 p-4 hover:bg-[#f0f4f2] dark:hover:bg-white/5 transition-colors text-left">
+                    <span class="material-symbols-outlined text-red-500">logout</span>
+                    <span class="font-medium">Cerrar Sesión</span>
+                </button>
+            </div>
+
+            <p class="text-center text-xs text-[#63886f] mt-6">Panel Pastoral v1.0</p>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-white dark:bg-[#1a2a1f] border-t border-[#f0f4f2] dark:border-white/10 px-4 py-2 flex justify-around items-center z-30">
+        <button id="navInicio" class="nav-btn active flex flex-col items-center gap-0.5 py-1 px-3">
+            <span class="material-symbols-outlined text-2xl">home</span>
+            <span class="text-[10px] font-medium">Inicio</span>
+        </button>
+        <button id="navReportes" class="nav-btn flex flex-col items-center gap-0.5 py-1 px-3 text-[#63886f]">
+            <span class="material-symbols-outlined text-2xl">analytics</span>
+            <span class="text-[10px] font-medium">Reportes</span>
+        </button>
+        <div class="-mt-6">
+            <button id="navAdd" class="size-14 bg-primary text-background-dark rounded-full shadow-lg border-4 border-white dark:border-[#1a2a1f] flex items-center justify-center hover:scale-105 transition-transform">
+                <span class="material-symbols-outlined text-3xl font-bold">add</span>
+            </button>
+        </div>
+        <button id="navMiembros" class="nav-btn flex flex-col items-center gap-0.5 py-1 px-3 text-[#63886f]">
+            <span class="material-symbols-outlined text-2xl">groups</span>
+            <span class="text-[10px] font-medium">Miembros</span>
+        </button>
+        <button id="navSettings" class="nav-btn flex flex-col items-center gap-0.5 py-1 px-3 text-[#63886f]">
+            <span class="material-symbols-outlined text-2xl">settings</span>
+            <span class="text-[10px] font-medium">Ajustes</span>
+        </button>
+    </nav>
+</div>
+
+<!-- Modal Login Pastoral -->
+<div id="modalLogin" class="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center hidden">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-2xl w-80 max-w-[90vw] text-center animate-pop">
+        <div class="size-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="material-symbols-outlined text-4xl text-primary">lock</span>
+        </div>
+        <h3 class="text-xl font-bold mb-2">Acceso Pastoral</h3>
+        <p id="loginMsg" class="text-sm text-slate-500 dark:text-slate-400 mb-4">Ingresa la contraseña para continuar.</p>
+        <input id="inputPassword" type="password" placeholder="Contraseña" class="w-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 px-4 py-3 mb-4 focus:ring-2 focus:ring-primary/50" />
+        <button id="btnLoginSubmit" class="w-full bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 rounded-xl shadow-lg">Ingresar</button>
+        <p id="loginError" class="text-red-500 text-sm mt-3 hidden">Contraseña incorrecta</p>
+    </div>
+</div>
+
+<!-- Modal Crear Notificación -->
+<div id="modalNotificacion" class="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center hidden">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-2xl w-[90vw] max-w-sm animate-pop">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">campaign</span>
+                Enviar Notificación
+            </h3>
+            <button id="cerrarModalNotificacion" class="size-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        
+        <!-- Destinatario -->
+        <div class="mb-4">
+            <label class="text-xs font-bold text-[#63886f] uppercase mb-2 block">¿A quién va dirigida?</label>
+            <div class="flex gap-2 flex-wrap">
+                <button class="notif-target-btn active px-3 py-2 rounded-xl text-xs font-semibold bg-primary text-[#112116]" data-target="todos">
+                    Todos
+                </button>
+                <button class="notif-target-btn px-3 py-2 rounded-xl text-xs font-medium bg-[#f0f4f2] dark:bg-white/5" data-target="ministerio">
+                    Ministerio
+                </button>
+                <button class="notif-target-btn px-3 py-2 rounded-xl text-xs font-medium bg-[#f0f4f2] dark:bg-white/5" data-target="miembro">
+                    Miembro
+                </button>
+            </div>
+        </div>
+
+        <!-- Selector de Ministerio (oculto por defecto) -->
+        <div id="selectorMinisterio" class="mb-4 hidden">
+            <label class="text-xs font-bold text-[#63886f] uppercase mb-2 block">Selecciona ministerio</label>
+            <select id="notifMinisterio" class="w-full bg-[#f0f4f2] dark:bg-white/5 border-none rounded-xl py-3 px-4 text-sm">
+                <option value="Damas">Damas</option>
+                <option value="Caballeros">Caballeros</option>
+                <option value="Niños">Niños</option>
+                <option value="Jovenes">Jóvenes</option>
+            </select>
+        </div>
+
+        <!-- Selector de Miembro (oculto por defecto) -->
+        <div id="selectorMiembro" class="mb-4 hidden">
+            <label class="text-xs font-bold text-[#63886f] uppercase mb-2 block">Buscar miembro</label>
+            <input id="buscarMiembroNotif" type="text" placeholder="Escribe el nombre..." class="w-full bg-[#f0f4f2] dark:bg-white/5 border-none rounded-xl py-3 px-4 text-sm mb-2" />
+            <div id="listaMiembrosNotif" class="max-h-32 overflow-y-auto space-y-1"></div>
+            <input type="hidden" id="miembroSeleccionadoId" value="" />
+            <div id="miembroSeleccionadoNombre" class="text-sm text-primary font-medium mt-2 hidden"></div>
+        </div>
+
+        <!-- Título -->
+        <div class="mb-4">
+            <label class="text-xs font-bold text-[#63886f] uppercase mb-2 block">Título</label>
+            <input id="notifTitulo" type="text" placeholder="Ej: Recordatorio importante" class="w-full bg-[#f0f4f2] dark:bg-white/5 border-none rounded-xl py-3 px-4 text-sm" />
+        </div>
+
+        <!-- Mensaje -->
+        <div class="mb-4">
+            <label class="text-xs font-bold text-[#63886f] uppercase mb-2 block">Mensaje</label>
+            <textarea id="notifMensaje" rows="3" placeholder="Escribe tu mensaje..." class="w-full bg-[#f0f4f2] dark:bg-white/5 border-none rounded-xl py-3 px-4 text-sm resize-none"></textarea>
+        </div>
+
+        <!-- Botón Enviar -->
+        <button id="btnEnviarNotificacion" class="w-full bg-primary hover:bg-primary/90 text-[#112116] font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined">send</span>
+            Enviar Notificación
+        </button>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-[#111813] text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium z-50 opacity-0 transition-opacity pointer-events-none">
+    Mensaje
+</div>
+
+</body>
+</html>

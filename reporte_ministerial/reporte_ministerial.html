@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title id="pageTitle">Reporte Ministerial Móvil</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#19e65e",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#112116",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<script>
+    // Prevent double-tap zoom on mobile
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (event) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+</script>
+<script type="module" src="reporte_ministerial.js"></script>
+<style>
+        /* Fallback styles in case Tailwind doesn't load */
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f6f8f6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .mobile-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile */
+            background: white;
+        }
+        .pop-card {
+            transition: transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .pop-card:active {
+            transform: scale(0.96);
+        }
+        /* Prevent zoom on input focus (iOS) */
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+        
+        /* Disable zoom on double-tap */
+        body, html {
+            touch-action: manipulation;
+        }
+
+        /* Temas por ministerio */
+        body.theme-damas {
+            background: linear-gradient(135deg, #fff1f7 0%, #ffe0f0 100%);
+        }
+        body.theme-damas .mobile-container {
+            background: radial-gradient(circle at 20% 20%, rgba(255,182,193,0.35), transparent 40%),
+                        radial-gradient(circle at 80% 30%, rgba(255,105,180,0.22), transparent 38%),
+                        #fff8fb;
+        }
+        body.theme-damas .floating-shape::after {
+            content: "✿";
+            color: #f472b6;
+            opacity: 0.15;
+            position: absolute;
+            font-size: 64px;
+            animation: float 6s ease-in-out infinite alternate;
+        }
+
+        body.theme-ninos {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff2c2 100%);
+        }
+        body.theme-ninos .mobile-container {
+            background: radial-gradient(circle at 30% 25%, rgba(255,221,87,0.35), transparent 40%),
+                        radial-gradient(circle at 75% 40%, rgba(255,196,0,0.2), transparent 42%),
+                        #fffbea;
+        }
+        body.theme-ninos .floating-shape::after {
+            content: "🐾";
+            color: #fbbf24;
+            opacity: 0.18;
+            position: absolute;
+            font-size: 56px;
+            animation: float 5s ease-in-out infinite alternate;
+        }
+
+        body.theme-jovenes {
+            background: linear-gradient(135deg, #e0f7ff 0%, #c2f5ff 100%);
+        }
+        body.theme-jovenes .mobile-container {
+            background: radial-gradient(circle at 25% 30%, rgba(14,165,233,0.25), transparent 38%),
+                        radial-gradient(circle at 70% 20%, rgba(34,211,238,0.25), transparent 36%),
+                        #ecfeff;
+        }
+        body.theme-jovenes .floating-shape::after {
+            content: "⚡";
+            color: #22d3ee;
+            opacity: 0.22;
+            position: absolute;
+            font-size: 52px;
+            animation: float 4.5s ease-in-out infinite alternate;
+        }
+
+        /* Animación flotante sutil */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-zinc-950 font-display">
+<!-- Desktop Wrapper to simulate mobile view -->
+<div class="min-h-screen w-full flex justify-center bg-slate-200 dark:bg-black/40">
+<div class="mobile-container w-full bg-background-light dark:bg-background-dark shadow-2xl flex flex-col relative overflow-hidden">
+<div class="floating-shape absolute inset-0 pointer-events-none"></div>
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between gap-3 border-b border-solid border-[#dce5df] dark:border-white/10 px-6 py-4 bg-white dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-start gap-3 flex-1 min-w-0">
+    <button id="btnVolverAlIndex" class="flex size-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors" title="Volver a inicio">
+        <span class="material-symbols-outlined">home</span>
+    </button>
+    <h2 id="tituloIglesia" class="text-[#111813] dark:text-white text-sm font-bold leading-tight tracking-tight break-words flex-1">Reporte Ministerial</h2>
+</div>
+<div class="flex gap-2 flex-shrink-0">
+    <button id="btnNotificaciones" class="flex size-10 cursor-pointer items-center justify-center rounded-xl bg-slate-100 dark:bg-white/5 text-[#111813] dark:text-white">
+        <span class="material-symbols-outlined">notifications</span>
+    </button>
+    <button id="btnMiembros" class="flex size-10 cursor-pointer items-center justify-center rounded-xl bg-slate-100 dark:bg-white/5 text-[#111813] dark:text-white">
+        <span class="material-symbols-outlined">account_circle</span>
+    </button>
+</div>
+</header>
+
+<!-- Modal Notificaciones -->
+<div id="modalNotificaciones" class="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center hidden">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-xl w-[90vw] max-w-sm">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">notifications</span>
+                Notificaciones
+            </h3>
+            <button id="cerrarNotificaciones" class="size-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        <div id="listaNotificaciones" class="max-h-60 overflow-y-auto">
+            <p class="text-slate-500 dark:text-slate-400 text-center py-4">No tienes notificaciones.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Miembros - Solo para seleccionar -->
+<div id="modalMiembros" class="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center hidden">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-xl w-[90vw] max-w-sm max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold">Seleccionar Miembro</h3>
+            <button id="cerrarMiembros" class="size-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Elige un miembro guardado para acelerar tus reportes.</p>
+        <div class="mt-2">
+            <h4 class="font-bold mb-2 text-sm">Miembros disponibles</h4>
+            <ul id="listaMiembros" class="space-y-2 max-h-40 overflow-y-auto"></ul>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Perfil - Para agregar fecha de nacimiento -->
+<div id="modalPerfil" class="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center hidden">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-xl w-[90vw] max-w-sm">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">person</span>
+                Perfil
+            </h3>
+            <button id="cerrarPerfil" class="size-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        <div id="textoModalPerfil" class="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+            <p class="mb-3">La fecha de nacimiento es importante para:</p>
+            <ul class="list-disc list-inside space-y-2 text-xs">
+                <li>Celebrar tu cumpleaños en la iglesia</li>
+                <li>Organizar encuentros por edades</li>
+                <li>Mantener un registro actualizado</li>
+            </ul>
+        </div>
+        <div class="flex flex-col gap-2 mb-4">
+            <label class="text-xs font-semibold text-slate-500">Fecha de nacimiento</label>
+            <input id="inputNacimientoPerfil" type="date" class="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3" />
+        </div>
+        <button id="btnGuardarFechaPerfil" class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl">Guardar fecha</button>
+    </div>
+</div>
+
+<main class="flex-1 pb-32">
+<!-- Headline -->
+<div class="px-6 pt-8 pb-4">
+<h1 class="text-[#111813] dark:text-white text-3xl font-bold leading-tight">Enviar Reporte</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Completa tus actividades de esta semana.</p>
+</div>
+<!-- User Identification -->
+<section class="px-6 space-y-4">
+<div class="flex flex-col gap-1">
+    <label class="text-[#111813] dark:text-slate-200 text-base font-semibold px-1">Nombre Completo</label>
+    <input id="nombreInput" class="w-full rounded-xl border-[#dce5df] dark:border-white/10 bg-white dark:bg-white/5 text-[#111813] dark:text-white h-14 px-4 focus:ring-primary focus:border-primary text-lg" placeholder="Ej. Juan Pérez" type="text"/>
+</div>
+<div class="flex flex-col gap-1">
+        <label class="text-[#111813] dark:text-slate-200 text-base font-semibold px-1">Ministerio</label>
+        <div class="relative">
+            <button id="ministerioDropdownBtn" type="button" class="w-full rounded-xl border-[#dce5df] dark:border-white/10 bg-white dark:bg-white/5 text-[#111813] dark:text-white h-14 px-4 text-left text-lg flex items-center justify-between focus:ring-primary focus:border-primary">
+                <span id="ministerioDropdownText">Selecciona ministerio</span>
+                <span class="material-symbols-outlined ml-2">expand_more</span>
+            </button>
+            <ul id="ministerioDropdownList" class="absolute left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-[#dce5df] dark:border-white/10 rounded-xl shadow-lg z-20 hidden">
+                <li class="px-4 py-3 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer" data-value="Damas">Damas</li>
+                <li class="px-4 py-3 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer" data-value="Caballeros">Caballeros</li>
+                <li class="px-4 py-3 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer" data-value="Niños">Niños</li>
+                <li class="px-4 py-3 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer" data-value="Jovenes">Jóvenes</li>
+            </ul>
+            <input type="hidden" id="ministerioInput" value="" />
+        </div>
+</div>
+</section>
+<!-- Activity Metrics Panel - Mi Constancia -->
+<section class="px-6 pt-8">
+<div id="metricsPanel" class="bg-white dark:bg-zinc-800 rounded-2xl p-4 mb-6 shadow-sm border border-slate-100 dark:border-zinc-700 hidden">
+  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Mi Constancia (Últimos 30 días)</h3>
+  
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div id="streakIcon" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xl">
+        😴
+      </div>
+      <div>
+        <p id="lastReportText" class="text-sm font-bold text-slate-700 dark:text-slate-200">Sin actividad reciente</p>
+        <p id="streakCount" class="text-xs text-slate-500">¡Envía tu primer reporte hoy!</p>
+      </div>
+    </div>
+    
+    <div class="text-right">
+      <span id="reportsMonth" class="text-2xl font-black text-indigo-500">0</span>
+      <span class="text-xs text-slate-400 block">Reportes</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Activity Metrics Grid -->
+<section class="px-6 pt-8">
+<h3 class="text-[#111813] dark:text-white text-lg font-bold pb-4">Métricas de Actividad</h3>
+<div class="grid grid-cols-2 gap-4">
+    <div id="capitulosCard" class="pop-card bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl flex flex-col items-center justify-center text-center border-2 border-blue-100 dark:border-blue-800/30 cursor-pointer select-none relative">
+        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl mb-2">menu_book</span>
+        <span id="capitulosCount" class="text-blue-600 dark:text-blue-400 font-bold text-3xl">0</span>
+        <span class="text-blue-800 dark:text-blue-300 text-xs font-semibold uppercase mt-1">Capítulos</span>
+        <div class="absolute inset-0 flex z-10">
+            <div class="flex-1 h-full group cursor-pointer" data-action="restar" style="position: relative;">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-2xl text-blue-400 opacity-80 group-hover:opacity-100 select-none">-</span>
+            </div>
+            <div class="flex-1 h-full group cursor-pointer" data-action="sumar" style="position: relative;">
+                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-2xl text-blue-400 opacity-80 group-hover:opacity-100 select-none">+</span>
+            </div>
+        </div>
+    </div>
+    <div id="horasCard" class="pop-card bg-amber-50 dark:bg-amber-900/20 p-4 rounded-2xl flex flex-col items-center justify-center text-center border-2 border-amber-100 dark:border-amber-800/30 cursor-pointer select-none relative">
+        <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-3xl mb-2">schedule</span>
+        <span id="horasCount" class="text-amber-600 dark:text-amber-400 font-bold text-3xl">0:00</span>
+        <span class="text-amber-800 dark:text-amber-300 text-xs font-semibold uppercase mt-1">Horas Oración</span>
+        <div class="absolute inset-0 flex z-10">
+            <div class="flex-1 h-full group cursor-pointer" data-action="restar" style="position: relative;">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-2xl text-amber-400 opacity-80 group-hover:opacity-100 select-none">−</span>
+            </div>
+            <div class="flex-1 h-full group cursor-pointer" data-action="sumar" style="position: relative;">
+                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-2xl text-amber-400 opacity-80 group-hover:opacity-100 select-none">+</span>
+            </div>
+        </div>
+    </div>
+    <div id="ayunosCard" class="pop-card bg-purple-50 dark:bg-purple-900/20 p-4 rounded-2xl flex flex-col items-center justify-center text-center border-2 border-purple-100 dark:border-purple-800/30 cursor-pointer select-none relative">
+        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-3xl mb-2">restaurant_menu</span>
+        <span id="ayunosCount" class="text-purple-600 dark:text-purple-400 font-bold text-3xl">0</span>
+        <span class="text-purple-800 dark:text-purple-300 text-xs font-semibold uppercase mt-1">Ayunos</span>
+        <div class="absolute inset-0 flex z-10">
+            <div class="flex-1 h-full group cursor-pointer" data-action="restar" style="position: relative;">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-2xl text-purple-400 opacity-80 group-hover:opacity-100 select-none">-</span>
+            </div>
+            <div class="flex-1 h-full group cursor-pointer" data-action="sumar" style="position: relative;">
+                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-2xl text-purple-400 opacity-80 group-hover:opacity-100 select-none">+</span>
+            </div>
+        </div>
+    </div>
+    <div id="almasCard" class="pop-card bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl flex flex-col items-center justify-center text-center border-2 border-rose-100 dark:border-rose-800/30 cursor-pointer select-none relative">
+        <span class="material-symbols-outlined text-rose-600 dark:text-rose-400 text-3xl mb-2">groups</span>
+        <span id="almasCount" class="text-rose-600 dark:text-rose-400 font-bold text-3xl">0</span>
+        <span class="text-rose-800 dark:text-rose-300 text-xs font-semibold uppercase mt-1">Almas</span>
+        <div class="absolute inset-0 flex z-10">
+            <div class="flex-1 h-full group cursor-pointer" data-action="restar" style="position: relative;">
+                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-2xl text-rose-400 opacity-80 group-hover:opacity-100 select-none">-</span>
+            </div>
+            <div class="flex-1 h-full group cursor-pointer" data-action="sumar" style="position: relative;">
+                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-2xl text-rose-400 opacity-80 group-hover:opacity-100 select-none">+</span>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<!-- Binary Toggle -->
+<section class="px-6 pt-10">
+<h3 class="text-[#111813] dark:text-white text-base font-bold pb-3">¿Realizó Altar Familiar?</h3>
+<div class="flex bg-slate-200 dark:bg-white/10 p-1.5 rounded-xl">
+<button id="altarNo" class="flex-1 py-3 text-sm font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 bg-transparent">No</button>
+<button id="altarSi" class="flex-1 py-3 text-sm font-bold rounded-lg transition-all text-primary dark:text-background-dark bg-white dark:bg-primary shadow-sm">Sí</button>
+</div>
+</section>
+</main>
+<!-- Sticky Bottom Action -->
+<footer class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] p-6 bg-white/95 dark:bg-background-dark/95 backdrop-blur-md z-[100]">
+<button class="w-full bg-primary hover:bg-primary/90 text-background-dark text-lg font-bold py-4 rounded-xl shadow-[0_8px_30px_rgb(25,230,94,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">send</span>
+                    Enviar Reporte
+                </button>
+</footer>
+</div>
+</div>
+</body></html>

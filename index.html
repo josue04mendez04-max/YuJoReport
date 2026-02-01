@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<meta name="theme-color" content="#19e65e"/>
+<meta name="description" content="Sistema de reportes ministeriales - PWA Yujo Report"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Yujo Report"/>
+<link rel="manifest" href="./manifest.json"/>
+<link rel="icon" type="image/png" href="./assets/icon-192.png" sizes="192x192"/>
+<link rel="apple-touch-icon" href="./assets/icon-192.png"/>
+<title>Yujo Report - Sistema Ministerial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#19e65e",
+                        "pastoral": "#1e40af",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                    maxWidth: {
+                        "480px": "480px"
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .mobile-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-image: radial-gradient(#19e65e22 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .spiritual-pattern {
+            opacity: 0.03;
+            pointer-events: none;
+        }
+        
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slide-up {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        @keyframes slide-down {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+        .animate-slide-up {
+            animation: slide-up 0.4s ease-out;
+        }
+        .animate-slide-down {
+            animation: slide-down 0.5s ease-out;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-zinc-950 font-display">
+<!-- Modal de Instalación PWA -->
+<div id="installModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-end z-50 animate-fade-in">
+    <div class="w-full bg-background-light dark:bg-background-dark rounded-t-3xl p-6 pb-8 shadow-2xl animate-slide-up">
+        <div class="text-center mb-6">
+            <div class="size-16 bg-primary/20 dark:bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 ring-8 ring-primary/5">
+                <span class="material-symbols-outlined text-3xl text-primary">download</span>
+            </div>
+            <h2 id="welcomeTitle" class="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                Bienvenido a Yujo Report
+            </h2>
+            <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Instala la aplicación para acceder a <strong>todas las funciones</strong> offline y una experiencia mejorada
+            </p>
+        </div>
+        
+        <div class="space-y-3">
+            <button id="installBtn" class="w-full bg-primary hover:bg-green-600 text-emerald-950 font-bold py-4 px-6 rounded-2xl transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-xl">download</span>
+                <span>Instalar Aplicación</span>
+            </button>
+            <button id="dismissBtn" class="w-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-semibold py-3 px-6 rounded-2xl transition-all">
+                Continuar en web
+            </button>
+        </div>
+        
+        <p class="text-xs text-slate-500 dark:text-slate-500 text-center mt-4">
+            Puedes instalarla más tarde desde el menú de tu navegador
+        </p>
+    </div>
+</div>
+
+<!-- Modal de Actualización Forzada -->
+<div id="updateModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 animate-fade-in">
+    <div class="w-11/12 max-w-sm bg-background-light dark:bg-background-dark rounded-3xl p-6 shadow-2xl animate-slide-up">
+        <div class="text-center mb-6">
+            <div class="size-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-3xl text-blue-600 dark:text-blue-400">update</span>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                Actualización Disponible
+            </h2>
+            <p class="text-slate-600 dark:text-slate-400 text-sm">
+                Se ha detectado una nueva versión de <strong>Yujo Report v1.2.0</strong>. Es necesario actualizar para continuar.
+            </p>
+        </div>
+        
+        <!-- Cambios en la versión -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/30 rounded-xl p-4 mb-6">
+            <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-2">✨ Novedades:</h3>
+            <ul class="text-sm text-slate-700 dark:text-slate-300 space-y-1">
+                <li>🎮 Widget de Gamificación con 4 categorías</li>
+                <li>📱 Sistema mejorado de actualizaciones</li>
+                <li>🔧 Correcciones y optimizaciones</li>
+            </ul>
+        </div>
+        
+        <button id="forceUpdateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-2xl transition-all active:scale-95 shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-xl">download</span>
+            <span>Actualizar Ahora</span>
+        </button>
+        
+        <p class="text-xs text-slate-500 dark:text-slate-500 text-center">
+            Se recargarán tus datos automáticamente
+        </p>
+    </div>
+</div>
+
+<div class="min-h-screen w-full flex justify-center bg-slate-200 dark:bg-black/40">
+<div class="mobile-container w-full bg-background-light dark:bg-background-dark shadow-2xl flex flex-col relative overflow-hidden">
+
+<!-- 🍎 Banner de Notificaciones iOS (en-app) -->
+<div id="iosBanner" class="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[480px] z-50 px-4 pt-2 hidden">
+    <div class="bg-primary/95 backdrop-blur-md text-emerald-950 rounded-2xl p-4 shadow-lg animate-slide-down border border-primary/20">
+        <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3 flex-1 min-w-0">
+                <div class="size-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="material-symbols-outlined text-lg">notifications</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 id="iosBannerTitle" class="font-bold text-sm leading-tight">Nuevo aviso</h4>
+                    <p id="iosBannerMessage" class="text-xs text-emerald-800 mt-0.5 line-clamp-2">Mensaje de la notificación</p>
+                </div>
+            </div>
+            <button id="closeBanner" class="size-6 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors flex-shrink-0">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<header class="flex flex-col items-center pt-12 pb-8 px-6 text-center">
+<div id="onlineStatusBadge" class="mb-4"></div>
+<div class="size-20 bg-primary/20 dark:bg-primary/10 rounded-full flex items-center justify-center mb-6 ring-8 ring-primary/5">
+<div class="size-14 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined text-4xl">church</span>
+</div>
+</div>
+<h1 class="text-[#111813] dark:text-white text-3xl font-extrabold leading-tight tracking-tight">
+                    Sistema Ministerial
+                </h1>
+<p class="text-slate-500 dark:text-slate-400 mt-2 text-balance">
+                    Bienvenido de nuevo. Selecciona una opción para continuar con tu labor.
+                </p>
+</header>
+<section id="ranking-widget" class="w-full max-w-md mx-auto bg-white/90 dark:bg-zinc-900/80 rounded-2xl shadow-lg p-4 mb-4 border border-primary/10 flex flex-col gap-3 animate-fade-in">
+    <h2 class="text-lg font-extrabold text-primary flex items-center gap-2 mb-2 justify-center">
+        <span class="material-symbols-outlined text-2xl">emoji_events</span>
+        Ranking del Mes
+    </h2>
+    <div class="flex flex-col gap-2">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="material-symbols-outlined text-blue-700 dark:text-blue-200 text-xl">menu_book</span>
+                <span class="font-bold text-blue-800 dark:text-blue-200 text-sm">Lectura Bíblica</span>
+            </div>
+            <ul class="flex gap-2">
+                <li class="flex-1 flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 rounded-xl py-2">
+                    <span class="text-lg">🥇</span>
+                    <span class="text-xs font-semibold text-blue-900 dark:text-blue-100">Sin datos</span>
+                </li>
+                <li class="flex-1 flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 rounded-xl py-2">
+                    <span class="text-lg">🥈</span>
+                    <span class="text-xs font-semibold text-blue-900 dark:text-blue-100">Sin datos</span>
+                </li>
+                <li class="flex-1 flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 rounded-xl py-2">
+                    <span class="text-lg">🥉</span>
+                    <span class="text-xs font-semibold text-blue-900 dark:text-blue-100">Sin datos</span>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="material-symbols-outlined text-amber-700 dark:text-amber-200 text-xl">self_improvement</span>
+                <span class="font-bold text-amber-800 dark:text-amber-200 text-sm">Oración</span>
+            </div>
+            <ul class="flex gap-2">
+                <li class="flex-1 flex flex-col items-center bg-amber-50 dark:bg-amber-900/20 rounded-xl py-2">
+                    <span class="text-lg">🥇</span>
+                    <span class="text-xs font-semibold text-amber-900 dark:text-amber-100">Sin datos</span>
+                </li>
+                <li class="flex-1 flex flex-col items-center bg-amber-50 dark:bg-amber-900/20 rounded-xl py-2">
+                    <span class="text-lg">🥈</span>
+                    <span class="text-xs font-semibold text-amber-900 dark:text-amber-100">Sin datos</span>
+                </li>
+                <li class="flex-1 flex flex-col items-center bg-amber-50 dark:bg-amber-900/20 rounded-xl py-2">
+                    <span class="text-lg">🥉</span>
+                    <span class="text-xs font-semibold text-amber-900 dark:text-amber-100">Sin datos</span>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="material-symbols-outlined text-red-700 dark:text-red-200 text-xl">schedule</span>
+                <span class="font-bold text-red-800 dark:text-red-200 text-sm">Ayuno</span>
+            </div>
+            <ul class="flex gap-2">
+                <li class="flex-1 flex flex-col items-center bg-red-50 dark:bg-red-900/20 rounded-xl py-2">
+                    <span class="text-lg">🥇</span>
+                    <span class="text-xs font-semibold text-red-900 dark:text-red-100">Sin datos</span>
+                </li>
+                <li class="flex-1 flex flex-col items-center bg-red-50 dark:bg-red-900/20 rounded-xl py-2">
+                    <span class="text-lg">🥈</span>
+                    <span class="text-xs font-semibold text-red-900 dark:text-red-100">Sin datos</span>
+                </li>
+                <li class="flex-1 flex flex-col items-center bg-red-50 dark:bg-red-900/20 rounded-xl py-2">
+                    <span class="text-lg">🥉</span>
+                    <span class="text-xs font-semibold text-red-900 dark:text-red-100">Sin datos</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+
+<main class="flex-1 px-6 flex flex-col justify-center gap-6 pb-12">
+<button id="btnReporte" class="group relative w-full bg-primary hover:bg-[#16d154] text-emerald-950 p-8 rounded-3xl shadow-xl shadow-primary/20 flex flex-col items-center gap-4 transition-all active:scale-95">
+    <div class="size-16 bg-white/30 rounded-2xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-4xl font-bold">send</span>
+    </div>
+    <div class="text-center">
+        <span class="text-xl font-black block uppercase tracking-wide">Enviar Mi Reporte</span>
+        <span class="text-sm font-medium opacity-70">Registra tus actividades semanales</span>
+    </div>
+</button>
+<button id="btnPanel" class="group relative w-full bg-pastoral hover:bg-blue-800 text-white p-8 rounded-3xl shadow-xl shadow-blue-900/20 flex flex-col items-center gap-4 transition-all active:scale-95">
+    <div class="size-16 bg-white/10 rounded-2xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-4xl font-bold">dashboard</span>
+    </div>
+    <div class="text-center">
+        <span class="text-xl font-black block uppercase tracking-wide">Panel Pastoral</span>
+        <span class="text-sm font-medium opacity-70">Gestión y visualización de datos</span>
+    </div>
+</button>
+<!-- ...existing code... -->
+</main>
+<div class="absolute inset-0 spiritual-pattern pointer-events-none flex flex-wrap justify-around items-center p-12 overflow-hidden select-none">
+<span class="material-symbols-outlined text-6xl">flare</span>
+<span class="material-symbols-outlined text-6xl">auto_awesome</span>
+<span class="material-symbols-outlined text-6xl">favorite</span>
+<span class="material-symbols-outlined text-6xl">temple_hindu</span>
+<span class="material-symbols-outlined text-6xl">brightness_high</span>
+</div>
+<footer class="pb-10 pt-4 px-6">
+<div class="flex items-center justify-center gap-6">
+<button id="btnAcercaDe" class="text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-lg">info</span>
+                        Acerca de
+                    </button>
+<div class="size-1 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+<button id="btnAyuda" class="text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-lg">help</span>
+                        Ayuda
+                    </button>
+</div>
+<p class="text-[10px] text-center text-slate-400 dark:text-slate-600 mt-6 uppercase tracking-widest font-bold">
+                    © 2024 Gestión Ministerial • v0.1.0
+                </p>
+</footer>
+
+<!-- Modal Acerca de -->
+<div id="modalAcercaDe" class="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center hidden overflow-y-auto">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-xl w-[90vw] max-w-sm my-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">info</span>
+                Acerca de este Sistema
+            </h2>
+            <button id="cerrarAcercaDe" class="size-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        <div class="space-y-4 max-h-96 overflow-y-auto">
+            <div>
+                <h3 class="font-bold text-primary mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">church</span>
+                    ¿Qué es?
+                </h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300">
+                    Sistema de gestión ministerial para registrar y analizar actividades espirituales de iglesias: capítulos leídos, ayunos, almas ganadas y horas de oración.
+                </p>
+            </div>
+            
+            <div>
+                <h3 class="font-bold text-primary mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">send</span>
+                    Enviar Reporte
+                </h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300">
+                    Accede desde cualquier dispositivo usando el link de tu iglesia. Completa tu actividad semanal: capítulos, ayunos, almas y horas de oración. Los datos se guardan automáticamente.
+                </p>
+            </div>
+            
+            <div>
+                <h3 class="font-bold text-primary mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">dashboard</span>
+                    Panel Pastoral
+                </h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300">
+                    Visualiza reportes semanales, estadísticas de miembros, cumpleaños próximos y gestiona notificaciones para toda la congregación.
+                </p>
+            </div>
+            
+            <div>
+                <h3 class="font-bold text-primary mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">tips_and_updates</span>
+                    Tips Rápidos
+                </h3>
+                <ul class="text-sm text-slate-600 dark:text-slate-300 space-y-1 ml-4">
+                    <li>• Guarda miembros para reportes más rápidos</li>
+                    <li>• Usa filtros por ministerio para análisis detallado</li>
+                    <li>• Exporta reportes en Excel y PDF</li>
+                    <li>• Visualiza cumpleaños próximos en la pestaña "Miembros"</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ayuda -->
+<div id="modalAyuda" class="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center hidden overflow-y-auto">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-xl w-[90vw] max-w-sm my-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">help</span>
+                Centro de Ayuda
+            </h2>
+            <button id="cerrarAyuda" class="size-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        <div class="space-y-3">
+            <p class="text-sm text-slate-600 dark:text-slate-300">¿Necesitas ayuda? Puedes contactarnos a través de:</p>
+            
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=josue04mendez04@gmail.com&su=Ayuda%20Sistema%20Ministerial" 
+               target="_blank"
+               class="w-full bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl flex items-center gap-3 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+                <span class="material-symbols-outlined text-lg text-red-600 dark:text-red-400">mail</span>
+                <div class="flex-1">
+                    <div class="font-bold text-sm text-red-700 dark:text-red-300">Email</div>
+                    <div class="text-xs text-red-600 dark:text-red-400">josue04mendez04@gmail.com</div>
+                </div>
+                <span class="material-symbols-outlined text-red-600 dark:text-red-400">open_in_new</span>
+            </a>
+            
+            <a href="https://wa.me/50493619246483?text=Hola%20necesito%20ayuda%20con%20el%20sistema%20ministerial" 
+               target="_blank"
+               class="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-xl flex items-center gap-3 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
+                <span class="material-symbols-outlined text-lg text-green-600 dark:text-green-400">message</span>
+                <div class="flex-1">
+                    <div class="font-bold text-sm text-green-700 dark:text-green-300">WhatsApp</div>
+                    <div class="text-xs text-green-600 dark:text-green-400">+503 9361-9246483</div>
+                </div>
+                <span class="material-symbols-outlined text-green-600 dark:text-green-400">open_in_new</span>
+            </a>
+            
+            <p class="text-xs text-center text-slate-400 mt-4">
+                Responderemos a tu consulta lo antes posible.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tutorial iOS (YouTube) -->
+<div id="modalTutorial" class="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center hidden overflow-y-auto">
+    <div class="bg-slate-900 rounded-2xl p-4 shadow-2xl w-[95vw] max-w-lg my-8 flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">play_circle</span>
+                Tutorial de Instalación
+            </h2>
+            <button id="cerrarTutorial" class="size-8 flex items-center justify-center rounded-full bg-slate-700 hover:bg-slate-600">
+                <span class="material-symbols-outlined text-sm text-white">close</span>
+            </button>
+        </div>
+        
+        <!-- Video YouTube (Vertical - 9:16) -->
+        <div class="relative w-full bg-black rounded-xl overflow-hidden shadow-lg" style="padding-bottom: 177.78%; height: 0; max-width: 320px; margin: 0 auto;">
+            <iframe 
+                id="youtubeFrame"
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                src="https://www.youtube.com/embed/_xbQcvJm8tQ?autoplay=1"
+                title="Tutorial de Instalación iOS"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+        </div>
+        
+        <p class="text-sm text-slate-400 text-center mt-4">
+            Este video te muestra cómo instalar la aplicación en iOS de forma fácil
+        </p>
+    </div>
+</div>
+</div>
+<script type="module" src="./index.js"></script>
+<script>
+    // ============================================
+    // SISTEMA DE IDENTIDAD DINÁMICO + PWA
+    // ============================================
+    
+    const STORAGE_KEY = 'yujo_church_id'; // Clave de localStorage para persistencia
+    let currentChurchId = null;
+
+    /**
+     * Detección inteligente de churchId en este orden:
+     * 1. Parámetro URL (?id=...)
+     * 2. localStorage (sesiones previas)
+     * 3. sessionStorage (para iOS PWA que aísla localStorage)
+     * 4. Mostrar pantalla de rescate
+     */
+    async function detectChurchIdentity() {
+        console.log('🔍 Iniciando detección de identidad...');
+        
+        // Paso 1: Revisar parámetro URL (máxima prioridad)
+        const params = new URLSearchParams(window.location.search);
+        const urlId = params.get('id');
+        
+        if (urlId) {
+            console.log('✅ ID detectado en URL:', urlId);
+            currentChurchId = urlId;
+            // Guardar en TODOS los storages posibles (iOS PWA necesita redundancia)
+            localStorage.setItem(STORAGE_KEY, urlId);
+            sessionStorage.setItem(STORAGE_KEY, urlId);
+            // También guardar con timestamp para validar vigencia
+            localStorage.setItem(STORAGE_KEY + '_timestamp', Date.now().toString());
+            return true;
+        }
+        
+        // Paso 2: Revisar localStorage
+        const storedId = localStorage.getItem(STORAGE_KEY);
+        if (storedId) {
+            console.log('✅ ID recuperado de localStorage:', storedId);
+            currentChurchId = storedId;
+            sessionStorage.setItem(STORAGE_KEY, storedId);
+            // Limpiar parámetro URL si existe (evitar duplicados)
+            if (window.location.search) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            return true;
+        }
+        
+        // Paso 3: Revisar sessionStorage (fallback para iOS PWA)
+        const sessionId = sessionStorage.getItem(STORAGE_KEY);
+        if (sessionId) {
+            console.log('✅ ID recuperado de sessionStorage (iOS PWA):', sessionId);
+            currentChurchId = sessionId;
+            // Intentar restaurar a localStorage
+            localStorage.setItem(STORAGE_KEY, sessionId);
+            return true;
+        }
+        
+        // Paso 4: Mostrar pantalla de rescate
+        console.log('⚠️ No hay ID detectado - mostrando pantalla de rescate');
+        showRescueScreen();
+        return false;
+    }
+
+    /**
+     * Pantalla de rescate para entrada manual de ID
+     */
+    function showRescueScreen() {
+        const mainContent = document.querySelector('body > div > div');
+        
+        const rescueHTML = `
+            <div class="min-h-screen w-full flex justify-center bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+                <div class="w-full max-w-480px flex flex-col justify-center items-center px-6 py-12">
+                    <!-- Animación de carga -->
+                    <div class="mb-8">
+                        <div class="w-20 h-20 rounded-full bg-gradient-to-r from-primary to-emerald-400 p-1 animate-spin-slow">
+                            <div class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl text-primary">church</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h1 class="text-4xl font-black text-white text-center mb-2">Yujo Report</h1>
+                    <p class="text-slate-400 text-center mb-8">Sistema Ministerial Offline-First</p>
+
+                    <!-- Formulario de rescate -->
+                    <div class="w-full max-w-sm">
+                        <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
+                            <label class="block text-white font-bold mb-3 text-lg">
+                                <span class="material-symbols-outlined text-primary align-middle mr-2">vpn_key</span>
+                                ID de la Congregación
+                            </label>
+                            
+                            <input 
+                                id="rescueIdInput"
+                                type="text" 
+                                placeholder="Ingresa el ID de tu iglesia"
+                                class="w-full bg-white/10 text-white placeholder-slate-400 rounded-2xl px-6 py-4 border border-white/30 focus:border-primary focus:outline-none transition-all mb-6 font-mono text-center text-lg"
+                                autocomplete="off"
+                            />
+                            
+                            <button 
+                                id="rescueSubmitBtn"
+                                class="w-full bg-primary hover:bg-emerald-500 text-emerald-950 font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-primary/50 flex items-center justify-center gap-2"
+                            >
+                                <span class="material-symbols-outlined">login</span>
+                                Ingresar al Sistema
+                            </button>
+                            
+                            <p class="text-slate-400 text-xs text-center mt-4">
+                                El ID te será proporcionado por tu pastor o lider de grupo.
+                            </p>
+                        </div>
+
+                        <!-- Información adicional -->
+                        <div class="mt-8 text-center">
+                            <p class="text-slate-400 text-sm mb-4">📱 Acceso Offline Automático</p>
+                            <p class="text-slate-500 text-xs">
+                                Una vez ingreses, esta aplicación funcionará sin conexión. 
+                                Los datos se sincronizarán automáticamente cuando vuelva la conexión.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        mainContent.innerHTML = rescueHTML;
+        
+        // Event listeners
+        const rescueInput = document.getElementById('rescueIdInput');
+        const rescueBtn = document.getElementById('rescueSubmitBtn');
+        
+        rescueBtn.addEventListener('click', () => processRescueId());
+        rescueInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') processRescueId();
+        });
+        
+        rescueInput.focus();
+    }
+
+    /**
+     * Procesar ID ingresado en pantalla de rescate
+     */
+    function processRescueId() {
+        const input = document.getElementById('rescueIdInput');
+        const id = input.value.trim();
+        
+        if (!id) {
+            input.style.borderColor = '#ef4444';
+            console.warn('⚠️ ID vacío');
+            return;
+        }
+        
+        console.log('✅ ID ingresado manualmente:', id);
+        currentChurchId = id;
+        // Guardar en AMBOS storages para máxima compatibilidad (iOS PWA)
+        localStorage.setItem(STORAGE_KEY, id);
+        sessionStorage.setItem(STORAGE_KEY, id);
+        localStorage.setItem(STORAGE_KEY + '_timestamp', Date.now().toString());
+        redirectToHome();
+    }
+
+    /**
+     * Redirigir al home con ID en URL
+     */
+    function redirectToHome() {
+        console.log('→ Redirigiendo con ID:', currentChurchId);
+        window.location.href = window.location.pathname + `?id=${encodeURIComponent(currentChurchId)}`;
+    }
+
+    /**
+     * Cargar botones de navegación
+     */
+    function setupNavigation() {
+        if (!currentChurchId) return;
+        
+        const buildUrl = (path) => `${path}?id=${encodeURIComponent(currentChurchId)}`;
+        
+        const btnReporte = document.getElementById('btnReporte');
+        const btnPanel = document.getElementById('btnPanel');
+        
+        if (btnReporte) {
+            btnReporte.addEventListener('click', () => {
+                window.location.href = buildUrl('./reporte_ministerial/reporte_ministerial.html');
+            });
+        }
+        
+        if (btnPanel) {
+            btnPanel.addEventListener('click', () => {
+                window.location.href = buildUrl('./panel_pastoral/panel_pastoral.html');
+            });
+        }
+    }
+
+    /**
+     * Registrar Service Worker para funcionalidad offline
+     */
+    function registerServiceWorker() {
+        if (!('serviceWorker' in navigator)) {
+            console.log('⚠️ Service Worker no soportado en este navegador');
+            return;
+        }
+        
+        navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+                console.log('✅ Service Worker registrado correctamente:', registration.scope);
+            })
+            .catch(error => {
+                console.warn('⚠️ Error registrando Service Worker:', error.message);
+            });
+    }
+
+    /**
+     * SISTEMA DE INSTALACIÓN PWA
+     */
+    let deferredPrompt = null;
+    const isInstalledApp = window.matchMedia('(display-mode: standalone)').matches;
+
+    // Detectar iOS y Safari
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    const isAppleDevice = isIOS || isSafari;
+
+    /**
+     * SISTEMA ONLINE/OFFLINE CON INDICADOR
+     */
+    let isOnline = navigator.onLine;
+    
+    function updateOnlineStatus() {
+        isOnline = navigator.onLine;
+        const statusBadge = document.getElementById('onlineStatusBadge');
+        
+        if (statusBadge) {
+            if (isOnline) {
+                statusBadge.innerHTML = `
+                    <span class="flex items-center gap-2">
+                        <span class="size-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-xs font-semibold text-green-700 dark:text-green-400">Conectado</span>
+                    </span>
+                `;
+                statusBadge.classList.remove('hidden');
+            } else {
+                statusBadge.innerHTML = `
+                    <span class="flex items-center gap-2">
+                        <span class="size-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                        <span class="text-xs font-semibold text-yellow-700 dark:text-yellow-400">Modo Offline</span>
+                    </span>
+                `;
+                statusBadge.classList.remove('hidden');
+                console.log('⚠️ Modo offline activado - usando datos en caché');
+            }
+        }
+    }
+    
+    // Escuchar cambios de conexión
+    window.addEventListener('online', () => {
+        console.log('✅ Conexión restaurada');
+        updateOnlineStatus();
+        // Aquí puedes agregar sincronización de datos
+    });
+    
+    window.addEventListener('offline', () => {
+        console.log('⚠️ Conexión perdida');
+        updateOnlineStatus();
+    });
+
+    /**
+     * SISTEMA DE NOTIFICACIONES PUSH
+     */
+    async function initNotifications() {
+        // Solo en Android por ahora (iOS no soporta Web Push)
+        if (!('Notification' in window)) {
+            console.log('⚠️ Este navegador no soporta notificaciones');
+            return;
+        }
+        
+        if (Notification.permission === 'granted') {
+            console.log('✅ Notificaciones ya habilitadas');
+            return;
+        }
+        
+        if (Notification.permission !== 'denied') {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    console.log('✅ Notificaciones habilitadas');
+                    // Enviar notificación de bienvenida
+                    if ('serviceWorker' in navigator) {
+                        const registration = await navigator.serviceWorker.ready;
+                        const churchName = currentChurchId || 'Yujo Report';
+                        registration.showNotification(`Bienvenido a ${churchName}`, {
+                            badge: './assets/icon-192.png',
+                            icon: './assets/icon-192.png',
+                            body: '✅ App instalada correctamente. ¡Bienvenido!',
+                            tag: 'welcome-notification',
+                            requireInteraction: false,
+                            actions: [
+                                {
+                                    action: 'open',
+                                    title: 'Abrir',
+                                    icon: './assets/icon-192.png'
+                                }
+                            ]
+                        });
+                    }
+                }
+            } catch (error) {
+                console.warn('⚠️ Error solicitando notificaciones:', error);
+            }
+        }
+    }
+
+    /**
+     * Enviar notificación de prueba (para debugging)
+     */
+    function sendTestNotification(title = 'Prueba', body = 'Esto es una notificación de prueba') {
+        if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification(title, {
+                    badge: './icon-192.png',
+                    icon: './icon-192.png',
+                    body: body,
+                    tag: 'test-notification',
+                    requireInteraction: false
+                });
+            });
+        }
+    }
+
+    async function showInstallModal() {
+        // Importar función desde firebase_config
+        const { getChurchNameFromDB } = await import('./firebase_config.js');
+        
+        const modal = document.getElementById('installModal');
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        const modalContent = modal.querySelector('.rounded-t-3xl');
+        
+        // Obtener nombre de iglesia desde Firebase
+        const churchName = await getChurchNameFromDB(currentChurchId);
+        
+        if (isAppleDevice) {
+            // Contenido para iOS/Safari
+            welcomeTitle.textContent = `Hola desde Yujo Report 🍎`;
+            modalContent.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="size-16 bg-amber-200/30 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4 ring-8 ring-amber-200/20">
+                        <span class="material-symbols-outlined text-3xl">info</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                        ¡Lo sentimos! 😔
+                    </h2>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">
+                        Actualmente, <strong>iOS no soporta la instalación de PWA</strong> como aplicación nativa.
+                    </p>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mt-2">
+                        Pero no te preocupes, pronto tendremos un <strong>tutorial especial</strong> para que aproveches todas las funciones.
+                    </p>
+                    
+                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Tu ID de iglesia:</p>
+                        <p class="text-sm font-bold text-blue-700 dark:text-blue-400">${currentChurchId}</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <button id="copyIdBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-2xl transition-all active:scale-95 shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-xl">content_copy</span>
+                        <span>Copiar ID</span>
+                    </button>
+                    <button id="tutorialBtn" class="w-full bg-primary hover:bg-green-600 text-emerald-950 font-bold py-4 px-6 rounded-2xl transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-xl">play_circle</span>
+                        <span>Ver Tutorial (Próximamente)</span>
+                    </button>
+                    <button id="dismissBtn" class="w-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-semibold py-3 px-6 rounded-2xl transition-all">
+                        Entendido
+                    </button>
+                </div>
+                
+                <p class="text-xs text-slate-500 dark:text-slate-500 text-center mt-4">
+                    Mientras tanto, puedes usar la aplicación en tu navegador Safari normalmente.
+                </p>
+            `;
+        } else {
+            // Contenido para Android y otros navegadores
+            welcomeTitle.textContent = `Bienvenido a ${churchName}`;
+            modalContent.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="size-16 bg-primary/20 dark:bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 ring-8 ring-primary/5">
+                        <span class="material-symbols-outlined text-3xl text-primary">download</span>
+                    </div>
+                    <h2 id="welcomeTitle" class="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                        Bienvenido a ${churchName}
+                    </h2>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">
+                        Instala la aplicación para acceder a <strong>todas las funciones</strong> offline y una experiencia mejorada
+                    </p>
+                </div>
+                
+                <div class="space-y-3">
+                    <button id="installBtn" class="w-full bg-primary hover:bg-green-600 text-emerald-950 font-bold py-4 px-6 rounded-2xl transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-xl">download</span>
+                        <span>Instalar Aplicación</span>
+                    </button>
+                    <button id="dismissBtn" class="w-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-semibold py-3 px-6 rounded-2xl transition-all">
+                        Continuar en web
+                    </button>
+                </div>
+                
+                <p class="text-xs text-slate-500 dark:text-slate-500 text-center mt-4">
+                    Puedes instalarla más tarde desde el menú de tu navegador
+                </p>
+            `;
+        }
+        
+        modal.classList.remove('hidden');
+        console.log('📱 Modal de instalación mostrado');
+        
+        // Re-asignar event listeners después de cambiar el HTML
+        setupModalListeners();
+    }
+
+    function hideInstallModal() {
+        const modal = document.getElementById('installModal');
+        modal.classList.add('hidden');
+        // NO guardar en sessionStorage - permitir que aparezca siempre
+    }
+
+    /**
+     * SISTEMA DE ACTUALIZACIÓN FORZADA
+     */
+    const APP_VERSION = '1.2.0';
+    const VERSION_KEY = 'appVersion';
+
+    function checkForUpdates() {
+        const storedVersion = localStorage.getItem(VERSION_KEY);
+        
+        if (!storedVersion) {
+            // Primera vez
+            localStorage.setItem(VERSION_KEY, APP_VERSION);
+            return;
+        }
+        
+        if (storedVersion !== APP_VERSION) {
+            console.log(`🔄 Actualización detectada: ${storedVersion} → ${APP_VERSION}`);
+            showUpdateModal();
+        }
+    }
+
+    function showUpdateModal() {
+        const modal = document.getElementById('updateModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            console.log('🔄 Modal de actualización mostrado');
+        }
+    }
+
+    function hideUpdateModal() {
+        const modal = document.getElementById('updateModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function forceUpdate() {
+        console.log('🔄 Forzando actualización...');
+        
+        // Limpiar caché antiguo
+        if ('caches' in window) {
+            caches.keys().then(cacheNames => {
+                cacheNames.forEach(cacheName => {
+                    if (cacheName.includes('yujo')) {
+                        caches.delete(cacheName);
+                        console.log('🗑️ Caché eliminado:', cacheName);
+                    }
+                });
+            });
+        }
+        
+        // Actualizar versión guardada
+        localStorage.setItem(VERSION_KEY, APP_VERSION);
+        
+        // Registrar nuevo service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(registration => {
+                    registration.unregister();
+                    console.log('✖️ Service Worker desregistrado');
+                });
+            }).then(() => {
+                console.log('🔄 Recargar página...');
+                // Esperar un momento y recargar
+                setTimeout(() => {
+                    window.location.href = window.location.href;
+                }, 500);
+            });
+        } else {
+            // Si no hay service worker, recargar directamente
+            window.location.reload(true); // true = reload bypass cache
+        }
+    }
+
+    /**
+     * Mostrar modal de tutorial (YouTube)
+     */
+    function showTutorialModal() {
+        const modal = document.getElementById('modalTutorial');
+        if (modal) {
+            modal.classList.remove('hidden');
+            console.log('▶️ Modal tutorial abierto');
+        }
+    }
+
+    function hideTutorialModal() {
+        const modal = document.getElementById('modalTutorial');
+        if (modal) {
+            modal.classList.add('hidden');
+            console.log('✖️ Modal tutorial cerrado');
+        }
+    }
+
+    function setupTutorialModal() {
+        const cerrarBtn = document.getElementById('cerrarTutorial');
+        const modal = document.getElementById('modalTutorial');
+        
+        if (cerrarBtn) {
+            cerrarBtn.addEventListener('click', hideTutorialModal);
+        }
+        
+        // Cerrar al hacer clic fuera del modal
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    hideTutorialModal();
+                }
+            });
+        }
+    }
+
+    /**
+     * 🍎 SISTEMA DE BANNER iOS (In-App Notifications)
+     */
+    function verificarBannersEnApp() {
+        const banners = JSON.parse(localStorage.getItem('pendingBanners') || '[]');
+        
+        if (banners.length > 0) {
+            // Mostrar el primer banner
+            const banner = banners[0];
+            mostrarBanneriOS(banner.titulo, banner.mensaje);
+            
+            // Remover el banner mostrado
+            banners.splice(0, 1);
+            localStorage.setItem('pendingBanners', JSON.stringify(banners));
+            
+            console.log('🍎 Banner iOS mostrado:', banner.titulo);
+        }
+        
+        // Verificar badge count
+        actualizarBadgeCount();
+    }
+
+    function mostrarBanneriOS(titulo, mensaje) {
+        const banner = document.getElementById('iosBanner');
+        const titleEl = document.getElementById('iosBannerTitle');
+        const messageEl = document.getElementById('iosBannerMessage');
+        
+        if (banner && titleEl && messageEl) {
+            titleEl.textContent = titulo;
+            messageEl.textContent = mensaje;
+            
+            banner.classList.remove('hidden');
+            
+            // Auto-ocultar después de 4 segundos
+            setTimeout(() => {
+                ocultarBanneriOS();
+            }, 4000);
+        }
+    }
+
+    function ocultarBanneriOS() {
+        const banner = document.getElementById('iosBanner');
+        if (banner) {
+            banner.classList.add('hidden');
+        }
+    }
+
+    function setupBanneriOS() {
+        const closeBtn = document.getElementById('closeBanner');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', ocultarBanneriOS);
+        }
+        
+        // Tocar el banner para abrir panel pastoral
+        const banner = document.getElementById('iosBanner');
+        if (banner) {
+            banner.addEventListener('click', (e) => {
+                if (e.target.closest('#closeBanner')) return;
+                
+                // Abrir panel pastoral si hay ID
+                const churchId = getQueryParam('id') || localStorage.getItem('lastChurchId');
+                if (churchId) {
+                    window.location.href = `panel_pastoral/panel_pastoral.html?id=${churchId}`;
+                }
+                ocultarBanneriOS();
+            });
+        }
+    }
+
+    async function actualizarBadgeCount() {
+        if ('setAppBadge' in navigator) {
+            try {
+                const id = getQueryParam('id') || localStorage.getItem('lastChurchId');
+                if (!id) return;
+                
+                // Importar Firebase dinámicamente
+                const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js');
+                const { db } = await import('./firebase_config.js');
+                
+                const snap = await getDocs(collection(db, `church_data/${id}/notificaciones`));
+                let contador = 0;
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if (!data.leido) contador++;
+                });
+                
+                navigator.setAppBadge(contador);
+                console.log('🍎 Badge actualizado:', contador);
+            } catch (e) {
+                console.warn('Error actualizando badge:', e);
+            }
+        }
+    }
+
+    /**
+     * Copiar ID de iglesia al portapapeles
+     */
+    async function copyChurchId() {
+        try {
+            await navigator.clipboard.writeText(currentChurchId);
+            alert(`✅ ID copiado: ${currentChurchId}`);
+            console.log('📋 ID de iglesia copiado:', currentChurchId);
+        } catch (error) {
+            console.error('Error copiando ID:', error);
+            alert(`⚠️ No se pudo copiar. ID: ${currentChurchId}`);
+        }
+    }
+
+    function setupModalListeners() {
+        const installBtn = document.getElementById('installBtn');
+        const dismissBtn = document.getElementById('dismissBtn');
+        const tutorialBtn = document.getElementById('tutorialBtn');
+        const copyIdBtn = document.getElementById('copyIdBtn');
+        const forceUpdateBtn = document.getElementById('forceUpdateBtn');
+        
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`Usuario ${outcome === 'accepted' ? 'aceptó' : 'rechazó'} la instalación`);
+                    deferredPrompt = null;
+                    hideInstallModal();
+                }
+            });
+        }
+        
+        if (tutorialBtn) {
+            tutorialBtn.addEventListener('click', () => {
+                console.log('📚 Abriendo tutorial en modal');
+                showTutorialModal();
+            });
+        }
+        
+        if (copyIdBtn) {
+            copyIdBtn.addEventListener('click', copyChurchId);
+        }
+        
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', hideInstallModal);
+        }
+        
+        if (forceUpdateBtn) {
+            forceUpdateBtn.addEventListener('click', forceUpdate);
+        }
+    }
+
+    // Escuchar evento de instalación
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('📱 beforeinstallprompt capturado - instalación disponible');
+    });
+
+    /**
+     * Inicialización principal
+     */
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('🚀 Yujo Report - Iniciando...');
+        
+        // Registrar SW primero (funciona independientemente de identidad)
+        registerServiceWorker();
+        
+        // Actualizar estado online/offline
+        updateOnlineStatus();
+        
+        // Inicializar modales
+        setupTutorialModal();
+        
+        // Detectar identidad
+        const identityDetected = await detectChurchIdentity();
+        
+        // Si hay identidad, cargar navegación
+        if (identityDetected) {
+            setupNavigation();
+            console.log('✅ Sistema listo con ID:', currentChurchId);
+            
+            // Mostrar modal de instalación si no está instalada
+            // FORZAR: siempre mostrar en primera visita
+            if (!isInstalledApp) {
+                console.log('📱 Mostrando modal de instalación (siempre visible)');
+                setTimeout(showInstallModal, 500);
+            }
+            
+            // ✅ Verificar actualizaciones
+            checkForUpdates();
+            
+            // 🍎 Configurar sistema de banners iOS
+            setupBanneriOS();
+            verificarBannersEnApp();
+            
+            // Inicializar notificaciones push
+            initNotifications();
+        }
+    });
+
+    // Escuchar evento de instalación (para Android/Chrome)
+    // Este evento es OPCIONAL - el modal se muestra aunque no exista
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('📱 beforeinstallprompt disponible - instalación soportada nativamente');
+    });
+
+    // Detectar cuando la app se instala
+    window.addEventListener('appinstalled', () => {
+        console.log('✅ App instalada exitosamente!');
+        hideInstallModal();
+        deferredPrompt = null;
+    });
+
+    // 🍎 Verificar banners cuando la app vuelve al foco
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            // App se abre - verificar banners pendientes
+            verificarBannersEnApp();
+        }
+    });
+
+    // Estilo para animación de spin
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 3s linear infinite;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</div>
+</div>
+
+</body></html>

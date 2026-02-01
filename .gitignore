@@ -1,0 +1,36 @@
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
+
+# Archivos de configuración local
+.env
+.env.local
+.env.development
+.env.production
+
+# Cache de navegadores
+.cache/
+
+# Archivos de backup
+*.bak
+*.backup
+*~
+
+# Archivos de IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Node modules (si se llegaran a usar)
+node_modules/
+
+# Archivos de Firebase (claves privadas)
+firebase-adminsdk-*.json
+service-account-key.json
