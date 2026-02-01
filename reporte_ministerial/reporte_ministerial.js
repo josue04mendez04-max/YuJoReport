@@ -212,7 +212,12 @@ function setupCard(cardId, countId, opts = {}) {
 			count.textContent = value;
 		}
 	}
+	
+	// Capturar clicks directamente en la tarjeta, sin overlays intermedios
 	card.addEventListener('click', function(e) {
+		// Prevenir que el click llegue a otros elementos
+		e.stopPropagation();
+		
 		const rect = card.getBoundingClientRect();
 		const x = e.clientX - rect.left;
 		if (x < rect.width / 2) {
@@ -232,6 +237,7 @@ function setupCard(cardId, countId, opts = {}) {
 		}
 		render();
 	});
+	
 	render();
 	// Permite reiniciar desde fuera
 	countersControl[cardId] = {

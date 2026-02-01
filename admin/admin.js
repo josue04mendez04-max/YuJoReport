@@ -68,7 +68,7 @@ form.addEventListener('submit', async (e) => {
 // --- FUNCIONES AUXILIARES ---
 
 async function cargarIglesias() {
-    listaIglesias.innerHTML = ''; // Limpiar lista
+    listaIglesias.innerHTML = '<li class="text-center py-8 text-slate-400 animate-pulse">Cargando iglesias...</li>';
     
     try {
         const q = query(collection(db, "config_church"), orderBy("createdAt", "desc"));
@@ -82,8 +82,10 @@ async function cargarIglesias() {
             return;
         }
 
-        // Crear array de promesas para cargar stats en paralelo
-        const iglesiasPromises = querySnapshot.docs.map(async (docSnap) => {
+        // Limpiar y mostrar iglesias inmediatamente SIN esperar estadísticas
+        listaIglesias.innerHTML = '';
+        
+        querySnapshot.docs.forEach((docSnap) => {
             const data = docSnap.data();
             const id = docSnap.id;
             
@@ -91,44 +93,16 @@ async function cargarIglesias() {
             const baseUrl = window.location.origin; 
             const accessLink = `${baseUrl}/index.html?id=${id}`;
 
-            // Contar reportes y accesos en paralelo
-            let totalReportes = 0;
-            let totalAccesos = 0;
-            try {
-                const [reportesSnap, accessSnap] = await Promise.all([
-                    getDocs(collection(db, `church_data/${id}/reportes`)),
-                    getDocs(collection(db, `church_data/${id}/access_logs`))
-                ]);
-                totalReportes = reportesSnap.size;
-                totalAccesos = accessSnap.size;
-            } catch (e) {
-                console.error('Error loading stats for', id, e);
-            }
-
-            return {
-                id,
-                data,
-                accessLink,
-                totalReportes,
-                totalAccesos
-            };
-        });
-
-        // Esperar a que todas las iglesias se carguen
-        const iglesias = await Promise.all(iglesiasPromises);
-
-        // Renderizar todas las iglesias
-        iglesias.forEach(({ id, data, accessLink, totalReportes, totalAccesos }) => {
             const item = document.createElement('li');
             item.className = "bg-white border border-slate-100 p-4 rounded-xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-indigo-200 transition-colors";
+            item.id = `iglesia-${id}`;
             
             item.innerHTML = `
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
                         <h3 class="font-bold text-slate-800 text-lg">${data.nombre}</h3>
                         <div class="flex gap-2">
-                            <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">${totalReportes} reportes</span>
-                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">${totalAccesos} accesos</span>
+                            <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-full font-semibold animate-pulse">Cargando...</span>
                         </div>
                     </div>
                     <p class="text-slate-500 text-sm flex items-center gap-1">
@@ -155,7 +129,41 @@ async function cargarIglesias() {
                 </div>
             `;
             listaIglesias.appendChild(item);
+            
+            // Cargar estadísticas de forma asíncrona sin bloquear
+            cargarEstadisticasIglesia(id);
         });
+
+    } catch (error) {
+        listaIglesias.innerHTML = `<p class="text-red-500 text-center">Error cargando lista: ${error.message}</p>`;
+    }
+}
+
+// Nueva función para cargar estadísticas de una iglesia específica
+async function cargarEstadisticasIglesia(id) {
+    try {
+        const [reportesSnap, accessSnap] = await Promise.all([
+            getDocs(collection(db, `church_data/${id}/reportes`)),
+            getDocs(collection(db, `church_data/${id}/access_logs`))
+        ]);
+        
+        const totalReportes = reportesSnap.size;
+        const totalAccesos = accessSnap.size;
+        
+        // Actualizar el elemento en el DOM
+        const item = document.getElementById(`iglesia-${id}`);
+        if (item) {
+            const badgesDiv = item.querySelector('.flex.gap-2');
+            if (badgesDiv) {
+                badgesDiv.innerHTML = `
+                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">${totalReportes} reportes</span>
+                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">${totalAccesos} accesos</span>
+                `;
+            }
+        }
+    } catch (e) {
+        console.error('Error loading stats for', id, e);
+    }
 
     } catch (error) {
         listaIglesias.innerHTML = `<p class="text-red-500 text-center">Error cargando lista: ${error.message}</p>`;
