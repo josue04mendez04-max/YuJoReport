@@ -82,29 +82,44 @@ async function cargarIglesias() {
             return;
         }
 
-        querySnapshot.forEach(async (docSnap) => {
+        // Crear array de promesas para cargar stats en paralelo
+        const iglesiasPromises = querySnapshot.docs.map(async (docSnap) => {
             const data = docSnap.data();
             const id = docSnap.id;
             
             // Construir la URL absoluta
-            // Asume que index.html está en la raíz, un nivel arriba de /admin/
             const baseUrl = window.location.origin; 
-            // Si tu index.html no está en la raíz, ajusta '/index.html' por la ruta correcta
             const accessLink = `${baseUrl}/index.html?id=${id}`;
 
-            // Contar reportes y accesos
+            // Contar reportes y accesos en paralelo
             let totalReportes = 0;
             let totalAccesos = 0;
             try {
-                const reportesSnap = await getDocs(collection(db, `church_data/${id}/reportes`));
+                const [reportesSnap, accessSnap] = await Promise.all([
+                    getDocs(collection(db, `church_data/${id}/reportes`)),
+                    getDocs(collection(db, `church_data/${id}/access_logs`))
+                ]);
                 totalReportes = reportesSnap.size;
-                
-                const accessSnap = await getDocs(collection(db, `church_data/${id}/access_logs`));
+                totalAccesos = accessSnap.size;
                 totalAccesos = accessSnap.size;
             } catch (e) {
                 console.error('Error loading stats for', id, e);
             }
 
+            return {
+                id,
+                data,
+                accessLink,
+                totalReportes,
+                totalAccesos
+            };
+        });
+
+        // Esperar a que todas las iglesias se carguen
+        const iglesias = await Promise.all(iglesiasPromises);
+
+        // Renderizar todas las iglesias
+        iglesias.forEach(({ id, data, accessLink, totalReportes, totalAccesos }) => {
             const item = document.createElement('li');
             item.className = "bg-white border border-slate-100 p-4 rounded-xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-indigo-200 transition-colors";
             

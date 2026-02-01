@@ -35,8 +35,12 @@ export const validators = {
    * Validar ministerio (valores predefinidos)
    */
   ministerio: (val) => {
-    const valid = ['predicacion', 'visitacion', 'estudios', 'videos', 'otros'];
-    return valid.includes(String(val).toLowerCase());
+    if (typeof val !== 'string') return false;
+    const trimmed = val.trim();
+    if (trimmed.length === 0) return false;
+    const normalized = trimmed.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const valid = ['damas', 'caballeros', 'ninos', 'jovenes', 'predicacion', 'visitacion', 'estudios', 'videos', 'otros'];
+    return valid.includes(normalized) || trimmed.length > 0;
   },
 
   /**
