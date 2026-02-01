@@ -1,70 +1,232 @@
-# 🔧 Guía de Integración: validators.js
+# � Integración del Sistema de Validadores
 
-## Introducción
+## Descripción General
 
-`validators.js` proporciona un sistema centralizado de validación para proteger la integridad de datos antes de enviarlos a Firebase.
-
----
-
-## Paso 1: Importar en reporte_ministerial.js
-
-```javascript
-// Agregar al inicio del archivo, después de los otros imports
-import { validators, validateData, showValidationErrors, clearValidationErrors } from '../validators.js';
-```
+Se ha conectado el archivo centralizado `validators.js` con los módulos principales de la aplicación, eliminando validaciones duplicadas e inconsistentes.
 
 ---
 
-## Paso 2: Validar antes de guardar reportes
+## ✅ Cambios Realizados
 
-Busca la función donde se guarda el reporte (típicamente `saveReport()` o similar) y agrega validación:
+### 1. **reporte_ministerial.js**
 
-### ANTES (sin validación)
+#### Antes (Validación desconectada):
 ```javascript
-async function saveReport(reportData) {
-    try {
-        await addDoc(collection(db, `church_data/${churchId}/reportes`), reportData);
-        console.log('✅ Reporte guardado');
-    } catch (error) {
-        console.error('❌ Error:', error);
-    }
+if (!nombre) {
+    alert('Por favor, ingresa tu nombre completo.');
+    return;
+}
+if (!ministerio) {
+    alert('Por favor, selecciona un ministerio.');
+    return;
 }
 ```
 
-### DESPUÉS (con validación)
+#### Ahora (Validación centralizada):
 ```javascript
-async function saveReport(reportData) {
-    // Limpiar errores previos
-    clearValidationErrors();
-    
-    // Definir esquema de validación
-    const schema = {
+import { validators, validateData, showValidationErrors, clearValidationErrors } from '../validators.js';
+
+// Usar el sistema centralizado
+clearValidationErrors();
+const validation = validateData(
+    { nombre, ministerio, fecha, capitulos: 0 },
+    {
         nombre: validators.nombre,
-        capitulos: validators.capitulos,
-        fecha: validators.fecha,
-        ministerio: validators.ministerio
-    };
-    
-    // Validar datos
-    const validation = validateData(reportData, schema);
-    
-    if (!validation.isValid) {
-        console.error('❌ Datos inválidos:', validation.errors);
-        showValidationErrors(validation.errors);
-        alert('❌ Por favor revisa los errores marcados en rojo');
+        ministerio: validators.ministerio,
+        fecha: validators.fecha
+    }
+);
+
+if (!validation.isValid) {
+    console.error('❌ Errores de validación:', validation.errors);
+    showValidationErrors(validation.errors);
+    alert(`⚠️ ${Object.values(validation.errors)[0]}`);
+    return;
+}
+```
+
+**Ventajas:**
+- ✅ Reutiliza validaciones de `validators.js`
+- ✅ Mensajes de error consistentes
+- ✅ Resalta campos con error en la UI
+- ✅ Misma lógica que Firebase Security Rules
+
+---
+
+### 2. **panel_pastoral.js**
+
+#### Función actualizada: `sendNotification()`
+
+**Antes:**
+```javascript
+if (!titulo || !mensaje) {
+    showToast('Completa título y mensaje');
+    return;
+}
+```
+
+**Ahora:**
+```javascript
+import { validators, validateData, showValidationErrors, clearValidationErrors } from '../validators.js';
+
+clearValidationErrors();
+const validation = validateData(
+    { nombre: titulo, ministerio: 'otros' },
+    {
+        nombre: validators.nombre
+    }
+);
+
+if (!validation.isValid) {
+    showToast('❌ El título debe tener entre 1 y 100 caracteres');
+    return;
+}
+
+// También validar ministerio si aplica
+if (currentNotifTarget === 'ministerio') {
+    targetValue = document.getElementById('notifMinisterio')?.value;
+    if (!validators.ministerio(targetValue)) {
+        showToast('❌ Ministerio inválido');
         return;
     }
-    
-    // Si pasó validación, guardar en Firebase
-    try {
-        await addDoc(collection(db, `church_data/${churchId}/reportes`), reportData);
-        console.log('✅ Reporte guardado correctamente');
-    } catch (error) {
-        console.error('❌ Error guardando en Firebase:', error);
-        alert('Error al guardar el reporte: ' + error.message);
-    }
 }
 ```
+
+**Ventajas:**
+- ✅ Validación de título consistente con nombre
+- ✅ Validación de ministerio usando validadores centralizados
+- ✅ Mensajes de error más descriptivos
+
+---
+
+## 📋 Validadores Disponibles
+
+| Validador | Reglas |
+|-----------|--------|
+| `validators.nombre` | 1-100 caracteres, no vacío después de trim |
+| `validators.capitulos` | Rango 0-500 |
+| `validators.ministerio` | Uno de: `predicacion`, `visitacion`, `estudios`, `videos`, `otros` |
+| `validators.fecha` | Formato ISO válido (YYYY-MM-DD) |
+| `validators.churchId` | String alfanumérico, mín 5 caracteres |
+| `validators.email` | Formato email válido |
+| `validators.phone` | Formato teléfono válido |
+| `validators.url` | URL válida |
+
+---
+
+## 🔄 Flujo de Validación
+
+```
+1. Usuario envía formulario
+    ↓
+2. clearValidationErrors() - Limpia errores previos
+    ↓
+3. validateData(data, schema) - Valida contra reglas centralizadas
+    ↓
+4. ¿Es válido?
+    ├─ NO → showValidationErrors() + alert
+    └─ SÍ → Enviar a Firebase
+```
+
+---
+
+## 🛡️ Consistencia con Firebase
+
+Las reglas de validación en `validators.js` **coinciden exactamente** con las Firebase Security Rules:
+
+### Ejemplo: Capítulos
+```javascript
+// Client-side (validators.js)
+capitulos: (val) => {
+    const num = parseInt(val);
+    return num >= 0 && num <= 500;
+}
+
+// Server-side (Firestore Rules)
+request.resource.data.capitulos >= 0 &&
+request.resource.data.capitulos <= 500
+```
+
+✅ **Validación en dos capas:** Client-side previene errores, Server-side protege contra manipulación.
+
+---
+
+## 📱 Ejemplo de Uso en Nuevas Funciones
+
+```javascript
+import { validators, validateData } from '../validators.js';
+
+// Validar múltiples campos
+const datos = {
+    nombre: 'Juan López',
+    email: 'juan@example.com',
+    capitulos: 15
+};
+
+const validation = validateData(datos, {
+    nombre: validators.nombre,
+    email: validators.email,
+    capitulos: validators.capitulos
+});
+
+if (!validation.isValid) {
+    console.error('Errores:', validation.errors);
+    // validation.errors = {
+    //   nombre: 'Valor inválido para nombre',
+    //   email: 'Valor inválido para email',
+    //   capitulos: 'Valor inválido para capitulos'
+    // }
+}
+```
+
+---
+
+## 🧪 Testing Manual
+
+### Test 1: Nombre vacío
+```javascript
+// En console del navegador
+validateData({ nombre: '', ministerio: 'predicacion' }, {
+    nombre: validators.nombre,
+    ministerio: validators.ministerio
+});
+// Resultado: { isValid: false, errors: { nombre: '...' } }
+```
+
+### Test 2: Capítulos fuera de rango
+```javascript
+validateData({ capitulos: 600 }, {
+    capitulos: validators.capitulos
+});
+// Resultado: { isValid: false, errors: { capitulos: '...' } }
+```
+
+### Test 3: Ministerio inválido
+```javascript
+validateData({ ministerio: 'invalido' }, {
+    ministerio: validators.ministerio
+});
+// Resultado: { isValid: false, errors: { ministerio: '...' } }
+```
+
+---
+
+## ⚠️ Notas Importantes
+
+1. **Siempre importar desde `../validators.js`** (ruta relativa)
+2. **Llamar `clearValidationErrors()`** antes de cada validación
+3. **Firebase Rules valida nuevamente** aunque el cliente valide (defense in depth)
+4. **Los mensajes de error son descriptivos** para mejor UX
+5. **No modificar `validators.js`** sin actualizar también las Firestore Rules
+
+---
+
+## 📞 Referencias
+
+- [validators.js](../validators.js) - Definición de validadores
+- [FIRESTORE_RULES_SETUP.md](./FIRESTORE_RULES_SETUP.md) - Rules equivalentes
+- [reporte_ministerial.js](../reporte_ministerial/reporte_ministerial.js) - Ejemplo en reportes
+- [panel_pastoral.js](../panel_pastoral/panel_pastoral.js) - Ejemplo en notificaciones
 
 ---
 

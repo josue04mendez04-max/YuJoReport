@@ -1,5 +1,6 @@
 import { db } from '../firebase_config.js';
 import { collection, getDocs, addDoc, query, where, orderBy, Timestamp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+import { validators, validateData, showValidationErrors, clearValidationErrors } from '../validators.js';
 
 function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -1003,8 +1004,22 @@ async function sendNotification() {
     const titulo = document.getElementById('notifTitulo')?.value.trim();
     const mensaje = document.getElementById('notifMensaje')?.value.trim();
     
-    if (!titulo || !mensaje) {
-        showToast('Completa título y mensaje');
+    // Validar usando el sistema centralizado
+    clearValidationErrors();
+    const validation = validateData(
+        { nombre: titulo, ministerio: 'otros' }, // 'nombre' como proxy para 'titulo'
+        {
+            nombre: validators.nombre // Reutilizar validador de nombre para titulo
+        }
+    );
+    
+    if (!validation.isValid) {
+        showToast('❌ El título debe tener entre 1 y 100 caracteres');
+        return;
+    }
+    
+    if (!mensaje || mensaje.length === 0) {
+        showToast('❌ El mensaje no puede estar vacío');
         return;
     }
     
@@ -1013,6 +1028,11 @@ async function sendNotification() {
     
     if (currentNotifTarget === 'ministerio') {
         targetValue = document.getElementById('notifMinisterio')?.value;
+        // Validar ministerio
+        if (!validators.ministerio(targetValue)) {
+            showToast('❌ Ministerio inválido');
+            return;
+        }
     } else if (currentNotifTarget === 'miembro') {
         if (!selectedMiembroForNotif) {
             showToast('Selecciona un miembro');

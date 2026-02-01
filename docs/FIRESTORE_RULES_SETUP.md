@@ -18,54 +18,37 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Función auxiliar para validar iglesia
     function belongsToChurch(churchId) {
       return request.auth != null;
     }
-    
-    // 📂 Colección: church_data/{churchId}/reportes
-    // Reportes de ministerio enviados por miembros
+
     match /church_data/{churchId}/reportes/{reportId} {
-      // Leer: solo el pastor/admin de esa iglesia
       allow read: if 
         request.auth != null;
       
-      // Crear: validar estructura
       allow create: if 
         request.auth != null &&
-        // Validar campos obligatorios
         request.resource.data.keys().hasAll(['nombre', 'capitulos', 'fecha', 'ministerio']) &&
-        // Validar tipos
         request.resource.data.nombre is string &&
         request.resource.data.capitulos is number &&
         request.resource.data.fecha is string &&
         request.resource.data.ministerio is string &&
-        // Validar rango de capítulos (0-500)
         request.resource.data.capitulos >= 0 &&
         request.resource.data.capitulos <= 500 &&
-        // Validar longitud de nombre (máx 100)
         request.resource.data.nombre.size() <= 100 &&
-        // Validar que nombre no esté vacío
         request.resource.data.nombre.trim().size() > 0 &&
-        // Validar ministerios válidos
         request.resource.data.ministerio in ['predicacion', 'visitacion', 'estudios', 'videos', 'otros'] &&
-        // Validar fecha es ISO válida
         request.resource.data.fecha.matches('^\\d{4}-\\d{2}-\\d{2}');
-      
-      // Actualizar: solo si es del mismo reporte
+
       allow update: if 
         request.auth != null &&
-        // Validar cambios
         request.resource.data.capitulos >= 0 &&
         request.resource.data.capitulos <= 500 &&
         request.resource.data.nombre.size() <= 100;
-      
-      // Eliminar: solo admin
+
       allow delete: if request.auth != null;
     }
     
-    // 📂 Colección: church_data/{churchId}/miembros
-    // Directorio de miembros de la iglesia
     match /church_data/{churchId}/miembros/{memberId} {
       allow read: if request.auth != null;
       
@@ -78,21 +61,16 @@ service cloud.firestore {
       allow update: if request.auth != null;
       allow delete: if request.auth != null;
     }
-    
-    // 📂 Colección: iglesias
-    // Información pública de las iglesias (solo nombre)
+
     match /iglesias/{churchId} {
-      // Cualquiera puede leer el nombre de la iglesia
       allow read: if true;
-      
-      // Solo el owner puede escribir
+
       allow write: if 
         request.auth != null &&
         resource.data.ownerUid == request.auth.uid;
     }
     
-    // 🚫 Negar todo lo demás
-    match /{document=**} {
+     match /{document=**} {
       allow read, write: if false;
     }
   }

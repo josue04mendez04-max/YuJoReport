@@ -1,7 +1,7 @@
 
-
 import { db } from '../firebase_config.js';
 import { collection, addDoc, doc, getDoc, getDocs, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+import { validators, validateData, showValidationErrors, clearValidationErrors } from '../validators.js';
 
 function getQueryParam(param) {
 	const urlParams = new URLSearchParams(window.location.search);
@@ -575,16 +575,29 @@ window.onload = async function() {
 	btnEnviar.onclick = async function() {
 		const nombre = document.getElementById('nombreInput').value.trim();
 		const ministerio = input.value;
+		const fecha = fechaHoyISO();
 		
-		// Validar datos esenciales
-		if (!nombre) {
-			alert('Por favor, ingresa tu nombre completo.');
+		// Validar datos usando el sistema centralizado
+		clearValidationErrors();
+		const validation = validateData(
+			{ nombre, ministerio, fecha, capitulos: 0 },
+			{
+				nombre: validators.nombre,
+				ministerio: validators.ministerio,
+				fecha: validators.fecha
+			}
+		);
+		
+		if (!validation.isValid) {
+			console.error('❌ Errores de validación:', validation.errors);
+			showValidationErrors(validation.errors);
+			
+			// Mostrar alerta con el primer error
+			const firstError = Object.values(validation.errors)[0];
+			alert(`⚠️ ${firstError}`);
 			return;
 		}
-		if (!ministerio) {
-			alert('Por favor, selecciona un ministerio.');
-			return;
-		}
+		
 		if (!churchId) {
 			alert('No se encontró el id de la iglesia en la URL.');
 			return;
