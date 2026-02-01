@@ -195,6 +195,12 @@ function setupNotificacionesModal() {
 function setupCard(cardId, countId, opts = {}) {
 	const card = document.getElementById(cardId);
 	const count = document.getElementById(countId);
+	
+	if (!card || !count) {
+		console.error(`❌ setupCard: elementos no encontrados - cardId: ${cardId}, countId: ${countId}`);
+		return;
+	}
+	
 	let value = 0;
 	function render() {
 		if (opts.minutes) {
@@ -307,21 +313,26 @@ window.onload = async function() {
 	const list = document.getElementById('ministerioDropdownList');
 	const text = document.getElementById('ministerioDropdownText');
 	const input = document.getElementById('ministerioInput');
-	btn.onclick = function(e) {
-		e.stopPropagation();
-		list.classList.toggle('hidden');
-	};
-	list.querySelectorAll('li').forEach(function(li) {
-		li.onclick = function() {
-			text.textContent = li.textContent;
-			input.value = li.getAttribute('data-value');
-			list.classList.add('hidden');
-			aplicarTema(input.value);
+	
+	if (btn && list && text && input) {
+		btn.onclick = function(e) {
+			e.stopPropagation();
+			list.classList.toggle('hidden');
 		};
-	});
-	document.addEventListener('click', function(e) {
-		list.classList.add('hidden');
-	});
+		list.querySelectorAll('li').forEach(function(li) {
+			li.onclick = function() {
+				text.textContent = li.textContent;
+				input.value = li.getAttribute('data-value');
+				list.classList.add('hidden');
+				aplicarTema(input.value);
+			};
+		});
+		document.addEventListener('click', function(e) {
+			list.classList.add('hidden');
+		});
+	} else {
+		console.error('❌ Elementos de ministerio dropdown no encontrados', { btn, list, text, input });
+	}
 
 	// Toggle altar familiar
 	let altar = true;
@@ -338,9 +349,14 @@ window.onload = async function() {
 			btnSi.classList.add('bg-transparent', 'text-slate-500', 'dark:text-slate-400');
 		}
 	}
-	btnSi.onclick = function() { altar = true; updateAltar(); };
-	btnNo.onclick = function() { altar = false; updateAltar(); };
-	updateAltar();
+	
+	if (btnSi && btnNo) {
+		btnSi.onclick = function() { altar = true; updateAltar(); };
+		btnNo.onclick = function() { altar = false; updateAltar(); };
+		updateAltar();
+	} else {
+		console.error('❌ Botones de altar no encontrados', { btnSi, btnNo });
+	}
 
 	// --- MODAL NOTIFICACIONES ---
 	const btnNotificaciones = document.getElementById('btnNotificaciones');
